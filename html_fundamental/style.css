@@ -1,0 +1,10 @@
+#table1 {
+  border: 1px solid #000; /* Change #000 to your desired border color */
+  border-collapse: collapse; /* Ensures borders don't double up */
+}
+
+#table1 th,
+#table1 td {
+  border: 1px solid #000; /* Adjust cell border color */
+  padding: 8px; /* Optional: Add padding for better readability */
+}
