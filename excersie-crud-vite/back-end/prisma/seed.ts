@@ -4,6 +4,8 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Clean tables first (order matters due to FK constraints)
+  await prisma.cart.deleteMany();
+  await prisma.user.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
 
@@ -21,7 +23,7 @@ async function main() {
     "Garden",
   ];
 
-  const createdCategories = await prisma.category.createMany({
+  await prisma.category.createMany({
     data: categoryNames.map((name) => ({ name })),
   });
 
@@ -33,9 +35,22 @@ async function main() {
     categories.map((cat) => [cat.name, cat.id])
   );
 
+  // Create users
+  const users = Array.from({ length: 10 }, (_, i) => ({
+    name: `User ${i + 1}`,
+    username: `user${i + 1}`,
+    email: `user${i + 1}@example.com`,
+    password: `password${i + 1}`,
+  }));
+
+  await prisma.user.createMany({
+    data: users,
+  });
+
   // Create products with categoryId
   const products = Array.from({ length: 1000 }, (_, i) => {
     const categoryName = categoryNames[i % categoryNames.length];
+
     return {
       name: `Product ${i + 1}`,
       price: parseFloat((Math.random() * 1000 + 1).toFixed(2)),

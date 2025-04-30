@@ -84,6 +84,7 @@ const productsSlice = createSlice({
         state.productList = action.payload.data.products;
         state.totalPages = action.payload.data.totalPages;
         state.currentPage = action.payload.data.page;
+        state.totalItems = action.payload.data.totalProducts;
       })
       .addCase(fetchProductsAsync.rejected, (state, action) => {
         state.state = "failed";

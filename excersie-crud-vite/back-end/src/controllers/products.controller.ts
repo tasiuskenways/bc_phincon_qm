@@ -14,17 +14,18 @@ const productsController = {
         include: {
           category: true,
         },
+        orderBy: {
+          name: "asc",
+        },
       });
       const totalProducts = await prisma.product.count();
       const totalPages = Math.ceil(totalProducts / limit);
 
-      setTimeout(() => {
-        res.json({
-          status: "success",
-          message: "Products fetched successfully",
-          data: { products, page, totalPages },
-        });
-      }, 300);
+      res.json({
+        status: "success",
+        message: "Products fetched successfully",
+        data: { products, page, totalPages, totalProducts },
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({

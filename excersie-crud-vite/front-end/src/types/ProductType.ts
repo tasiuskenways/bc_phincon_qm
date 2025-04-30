@@ -16,10 +16,12 @@ export interface ProductState {
   errorMsg: string | null;
   totalPages: number;
   currentPage: number;
+  totalItems: number;
 }
 
 export interface ProductResponse {
   products: Product[];
   totalPages: number;
   page: number;
+  totalProducts: number;
 }

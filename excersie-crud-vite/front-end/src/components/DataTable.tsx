@@ -51,7 +51,7 @@ const DataTable: React.FC<DataTableProps> = ({ onEdit, onDelete }) => {
 
   const dispatch = useAppDispatch();
 
-  const { totalPages, currentPage, productList, state, errorMsg } =
+  const { totalPages, currentPage, productList, state, errorMsg, totalItems } =
     useAppSelector((state: { products: ProductState }) => state.products);
 
   const isLoading = state === "loading";
@@ -187,8 +187,8 @@ const DataTable: React.FC<DataTableProps> = ({ onEdit, onDelete }) => {
         </div>
         <div className="text-sm text-gray-500">
           Showing {productList.length === 0 ? 0 : indexOfFirstItem + 1} -{" "}
-          {Math.min(indexOfLastItem, productList.length)} of{" "}
-          {productList.length} items
+          {Math.min(indexOfLastItem, productList.length * currentPage)} of{" "}
+          {totalItems} items
         </div>
       </div>
 

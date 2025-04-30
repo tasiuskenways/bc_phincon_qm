@@ -20,4 +20,25 @@ model Product {
   stock      Int
   categoryId String
   category   Category  @relation(fields: [categoryId], references: [id])
+  carts      Cart[]
 }
+
+model User {
+  id        String @id @default(uuid())
+  name      String
+  username  String @unique
+  email     String
+  password  String
+  carts     Cart[]
+}
+
+model Cart {
+  id        String @id @default(uuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  totalPrice Float
+}
+
