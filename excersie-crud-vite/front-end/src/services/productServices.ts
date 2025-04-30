@@ -1,7 +1,7 @@
 import { Product, ProductResponse } from "../types/ProductType";
 import { ResponseType } from "../types/ResponseType.ts";
 
-const API_URL = "http://localhost:5000/api/products";
+const API_URL = `${import.meta.env.VITE_API_URL}/products`;
 
 export const fetchProducts = async (
   page: number = 1,
@@ -14,6 +14,8 @@ export const fetchProducts = async (
   if (sortField) {
     url += `&sortBy=${sortField}&sortDir=${sortDirection}`;
   }
+
+  console.log("url", url);
 
   const response = await fetch(url);
 

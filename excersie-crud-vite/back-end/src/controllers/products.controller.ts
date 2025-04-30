@@ -11,19 +11,21 @@ const productsController = {
       const products = await prisma.product.findMany({
         skip: (page - 1) * limit,
         take: limit,
+        include: {
+          category: true,
+        },
+        orderBy: {
+          name: "asc",
+        },
       });
       const totalProducts = await prisma.product.count();
       const totalPages = Math.ceil(totalProducts / limit);
-      console.log("Total Products:", totalProducts);
-      console.log("Total Pages:", totalPages);
 
-      setTimeout(() => {
-        res.json({
-          status: "success",
-          message: "Products fetched successfully",
-          data: { products, page, totalPages },
-        });
-      }, 300);
+      res.json({
+        status: "success",
+        message: "Products fetched successfully",
+        data: { products, page, totalPages, totalProducts },
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({
@@ -36,22 +38,14 @@ const productsController = {
   getProductById: async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      let product;
-      if (isNaN(Number(id))) {
-        // If you want to find by name, use findFirst or ensure 'name' is unique in your schema
-        product = await prisma.product.findMany({
-          where: {
-            name: {
-              contains: id,
-              mode: "insensitive",
-            },
-          },
-        });
-      } else {
-        product = await prisma.product.findUnique({
-          where: { id: Number(id) },
-        });
-      }
+      const product = await prisma.product.findMany({
+        where: {
+          OR: [{ name: id }, { id: id }],
+        },
+        include: {
+          category: true,
+        },
+      });
 
       if (!product) {
         res.status(404).json({
@@ -164,7 +158,7 @@ const productsController = {
       }
 
       const updatedProduct = await prisma.product.update({
-        where: { id: Number(id) },
+        where: { id: id },
         data: updateData,
       });
       res.json({
@@ -184,7 +178,7 @@ const productsController = {
     try {
       const { id } = req.params;
       const existingProduct = await prisma.product.findUnique({
-        where: { id: Number(id) },
+        where: { id: id },
       });
       if (!existingProduct) {
         res.status(404).json({
@@ -194,7 +188,7 @@ const productsController = {
         return;
       }
       const deletedProduct = await prisma.product.delete({
-        where: { id: Number(id) },
+        where: { id: id },
       });
       res.json({
         status: "success",

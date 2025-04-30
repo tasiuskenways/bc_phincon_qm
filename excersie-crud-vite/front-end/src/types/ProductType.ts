@@ -1,7 +1,10 @@
+import { Category } from "./CategoryType";
+
 export interface Product {
   id?: number;
   name: string;
-  category: string;
+  categoryId: string;
+  category: Category;
   price: number;
   stock: number;
 }
@@ -13,10 +16,12 @@ export interface ProductState {
   errorMsg: string | null;
   totalPages: number;
   currentPage: number;
+  totalItems: number;
 }
 
 export interface ProductResponse {
   products: Product[];
   totalPages: number;
   page: number;
+  totalProducts: number;
 }
