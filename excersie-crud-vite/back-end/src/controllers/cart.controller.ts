@@ -8,9 +8,11 @@ const cartController = {
   getAllCarts: async (req: Request, res: Response) => {
     try {
       const carts = await prisma.cart.findMany({
-        include: {
+        select: {
+          id: true,
           user: { select: { id: true, name: true } },
           product: { select: { id: true, name: true, price: true } },
+          totalPrice: true,
         },
       });
 
@@ -30,13 +32,14 @@ const cartController = {
 
   getCart: async (req: Request, res: Response) => {
     try {
-      const { userId } = req.params;
+      const { id } = req.params;
 
-      const cartItems = await prisma.cart.findMany({
-        where: { userId },
-        include: {
+      const cartItems = await prisma.cart.findFirst({
+        where: { id: id },
+        select: {
           user: { select: { id: true, name: true } },
           product: { select: { id: true, name: true, price: true } },
+          quantity: true,
         },
       });
 
@@ -58,25 +61,23 @@ const cartController = {
     try {
       const { userId, productId, quantity } = req.body;
 
-      const product = await prisma.product.findUnique({
-        where: { id: productId },
-      });
+      const [product, existingCart] = await Promise.all([
+        prisma.product.findUnique({ where: { id: productId } }),
+        prisma.cart.findFirst({ where: { userId, productId } }),
+      ]);
+
       if (!product) {
         res.status(404).json({ status: "error", message: "Product not found" });
         return;
       }
 
-      const exsistCart = await prisma.cart.findFirst({
-        where: { userId, productId },
-      });
-
       let cart;
 
-      if (exsistCart) {
-        const totalPrice = exsistCart.totalPrice + product.price * quantity;
+      if (existingCart) {
+        const totalPrice = existingCart.totalPrice + product.price * quantity;
         cart = await prisma.cart.update({
-          where: { id: exsistCart.id },
-          data: { quantity: exsistCart.quantity + quantity, totalPrice },
+          where: { id: existingCart.id },
+          data: { quantity: existingCart.quantity + quantity, totalPrice },
         });
       } else {
         const totalPrice = product.price * quantity;
@@ -106,6 +107,11 @@ const cartController = {
       const cartItem = await prisma.cart.update({
         where: { id },
         data: { quantity },
+        select: {
+          id: true,
+          quantity: true,
+          product: { select: { name: true, price: true } },
+        },
       });
 
       res.json({
@@ -126,14 +132,26 @@ const cartController = {
     try {
       const { id } = req.params;
 
-      const cartItem = await prisma.cart.delete({
+      const cartItem = await prisma.cart.findUnique({
+        where: { id },
+        select: { id: true },
+      });
+
+      if (!cartItem) {
+        res.status(404).json({
+          status: "error",
+          message: "Cart item not found",
+        });
+        return;
+      }
+
+      await prisma.cart.delete({
         where: { id },
       });
 
       res.json({
         status: "success",
         message: "Product removed from cart",
-        data: cartItem,
       });
     } catch (error) {
       console.error("Failed to remove from cart:", error);
@@ -148,25 +166,36 @@ const cartController = {
     try {
       const { userId } = req.params;
 
-      const cartItems = await prisma.cart.findMany({
-        where: { userId },
-        include: {
-          user: { select: { id: true, name: true } },
-          product: { select: { id: true, name: true, price: true } },
-        },
-      });
+      console.log(userId);
+
+      const [totalPrice, cartItems] = await Promise.all([
+        prisma.cart.aggregate({
+          where: { userId },
+          _sum: { totalPrice: true },
+        }),
+        prisma.cart.findMany({
+          where: { userId: userId },
+          select: {
+            quantity: true,
+            productId: true,
+            id: true,
+            product: {
+              select: { id: true, name: true, price: true },
+            },
+          },
+        }),
+      ]);
 
       const cartUser: UserCartType = {
         userId: userId,
         productList: cartItems.map((item) => ({
+          cartId: item.id,
           productId: item.productId,
           quantity: item.quantity,
           productName: item.product.name,
           price: item.product.price,
         })),
-        totalPrice: cartItems
-          .flatMap((item) => item.totalPrice)
-          .reduce((a, b) => a + b, 0),
+        totalPrice: totalPrice._sum.totalPrice || 0,
       };
 
       res.json({
