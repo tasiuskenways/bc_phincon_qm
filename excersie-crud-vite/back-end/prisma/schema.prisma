@@ -7,10 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Category {
+  id       String    @id @default(uuid())
+  name     String
+  products Product[]
+}
+
 model Product {
-  id         Int      @id @default(autoincrement())
+  id         String    @id @default(uuid())
   name       String
   price      Float
   stock      Int
-  category  String
+  categoryId String
+  category   Category  @relation(fields: [categoryId], references: [id])
 }
