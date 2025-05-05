@@ -1,13 +1,16 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
+import bcryptjs from "bcryptjs";
+import { v7 as uuidv7 } from "uuid";
 
 const prisma = new PrismaClient();
 
 async function main() {
   // Clean tables first (order matters due to FK constraints)
-  await prisma.cart.deleteMany();
-  await prisma.user.deleteMany();
+  await prisma.transactionDetail.deleteMany();
+  await prisma.transaction.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
+  await prisma.user.deleteMany();
 
   // Create categories
   const categoryNames = [
@@ -35,13 +38,39 @@ async function main() {
     categories.map((cat) => [cat.name, cat.id])
   );
 
+  const saltRounds = bcryptjs.genSaltSync(10);
+
   // Create users
-  const users = Array.from({ length: 10 }, (_, i) => ({
-    name: `User ${i + 1}`,
-    username: `user${i + 1}`,
-    email: `user${i + 1}@example.com`,
-    password: `password${i + 1}`,
-  }));
+  const users: {
+    id: string;
+    username: string;
+    password: string;
+    role: Role;
+  }[] = Array.from({ length: 10 }, (_, i) => {
+    const id = uuidv7() as string;
+    const password = bcryptjs.hashSync(
+      `${id}${process.env.SECRET_KEY || ""}user${i + 1}`,
+      saltRounds
+    );
+    return {
+      id,
+      username: `user${i + 1}`,
+      password,
+      role: Role.Cashier,
+    };
+  });
+
+  const adminId = uuidv7() as string;
+  const adminPassword = bcryptjs.hashSync(
+    `${adminId}${process.env.SECRET_KEY || ""}admin`,
+    saltRounds
+  );
+  users.push({
+    id: adminId,
+    username: "admin",
+    password: adminPassword,
+    role: Role.Admin,
+  });
 
   await prisma.user.createMany({
     data: users,

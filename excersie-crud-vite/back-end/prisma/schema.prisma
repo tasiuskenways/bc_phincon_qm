@@ -7,38 +7,56 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Category {
-  id       String    @id @default(uuid())
-  name     String
-  products Product[]
+model Product {
+  id        String   @id @default(uuid())
+  name      String
+  price     Int
+  stock     Int
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
-model Product {
-  id         String    @id @default(uuid())
-  name       String
-  price      Float
-  stock      Int
-  categoryId String
-  category   Category  @relation(fields: [categoryId], references: [id])
-  carts      Cart[]
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  products  Product[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  totalPrice Int
+  cashierId  String
+  cashier    User     @relation(fields: [cashierId], references: [id])
+  transactionDetails TransactionDetail[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model TransactionDetail {
+  id         String   @id @default(uuid())
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+  transactionId String
+  product     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model User {
-  id        String @id @default(uuid())
-  name      String
-  username  String @unique
-  email     String
+  id        String   @id @default(uuid())
+  username  String   @unique
   password  String
-  carts     Cart[]
+  role      Role     @default(Cashier)
+  transactions Transaction[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
-model Cart {
-  id        String @id @default(uuid())
-  userId    String
-  user      User    @relation(fields: [userId], references: [id])
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-  quantity  Int
-  totalPrice Float
+enum Role {
+  Admin
+  Cashier
 }
 

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import createHttpError from "http-errors";
 import { ZodError } from "zod";
+import { env } from "../config/env";
 export const errorHandler = (
   err: unknown,
   req: Request,
@@ -34,7 +35,7 @@ export const errorHandler = (
       status: statusCode,
       details,
       stack:
-        process.env.NODE_ENV === "development"
+        env.NODE_ENV === "development"
           ? err instanceof Error
             ? err.stack
             : undefined
