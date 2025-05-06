@@ -5,7 +5,6 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import { errorHandler } from "./middlewares/errorHandler";
 import mainRouter from "./routes";
-import { validatePath } from "./validator/path.validator";
 
 const app = express();
 

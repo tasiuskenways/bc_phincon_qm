@@ -30,14 +30,9 @@ class AuthController {
         })
       ).toString("base64");
 
-      const token = Jwt.sign(
-        { ___: encodedPayloadBase64 },
-        env.JWT_SECRET || "",
-        {
-          expiresIn: env.JWT_EXPIRES_IN as string,
-        } as Jwt.SignOptions
-      );
-      console.log(token);
+      const token = Jwt.sign({ ___: encodedPayloadBase64 }, env.JWT_SECRET, {
+        expiresIn: env.JWT_EXPIRES_IN as string,
+      } as Jwt.SignOptions);
 
       res.status(200).json({
         status: "success",

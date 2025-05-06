@@ -2,8 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import { z } from "zod";
 import { env } from "../config/env";
 import Jwt from "jsonwebtoken";
-import bcryptjs from "bcryptjs";
-import { json } from "stream/consumers";
 
 export const loginValidator = async (
   req: Request,

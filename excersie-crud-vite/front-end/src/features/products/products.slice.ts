@@ -64,6 +64,7 @@ const initialState: ProductState = {
   errorMsg: null,
   totalPages: 0,
   currentPage: 1,
+  totalItems: 0,
 };
 
 const productsSlice = createSlice({
