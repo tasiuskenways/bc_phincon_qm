@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  fullname  String
+  email     String   @unique
+  phoneNumber String @unique
+  password  String
+  active    Boolean  @default(true)
+  data      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  exams     Exams[]
+}
+
+model Exams {
+  id String @id @default(uuid())
+  userId String
+  user Users @relation(fields: [userId], references: [id])
+  data Json?
+  tag String?
+  active Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Courses {
+  id String @id @default(uuid())
+  code String @unique
+  title String
+  description String?
+  order Int?
+  data Json?
+  tag String?
+  active Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model TryoutSections {
+  id String @id @default(uuid())
+  code String @unique
+  title String
+  description String?
+  order Int?
+  data Json?
+  tag String?
+  active Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
