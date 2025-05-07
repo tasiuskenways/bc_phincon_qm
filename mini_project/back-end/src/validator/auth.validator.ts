@@ -10,14 +10,14 @@ export const loginValidator = async (
 ) => {
   try {
     const loginSchema = z.object({
-      username: z.string().min(4),
+      email: z.string().email(),
       password: z.string(),
     });
     const validateError = loginSchema.safeParse(req.body).error;
     if (validateError) {
-      const { username, password } = validateError.formErrors.fieldErrors;
+      const { email, password } = validateError.formErrors.fieldErrors;
       const errorMessage =
-        (username && ` ${username[0]} for username`) ||
+        (email && ` ${email[0]} for email`) ||
         (password && `${password[0]} for password`) ||
         "Invalid input";
       res.status(400).json({
@@ -72,7 +72,7 @@ export const authTokenValidator = async (
   next: NextFunction
 ) => {
   try {
-    const authHeader = req.headers["authorization"];
+    const authHeader = req.cookies.auth_token ?? req.headers["authorization"];
     if (!authHeader) {
       res.status(401).json({
         status: "error",

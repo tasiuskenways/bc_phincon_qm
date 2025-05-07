@@ -6,10 +6,10 @@ import { env } from "../config/env";
 const prisma = new PrismaClient();
 
 class AuthServices {
-  async login(username: string): Promise<Users> {
+  async login(email: string): Promise<Users> {
     try {
-      const user = await prisma.users.findFirstOrThrow({
-        where: { username: username },
+      const user = await prisma.users.findUniqueOrThrow({
+        where: { email },
       });
 
       return user;
