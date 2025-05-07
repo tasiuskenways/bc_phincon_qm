@@ -97,6 +97,8 @@ async function main() {
         type: "course",
         startDate: null,
         endDate: null,
+        code: courses[0].code,
+        title: courses[0].title,
       };
 
       const tryouts = await prisma.tryoutSections.findMany({
@@ -112,6 +114,8 @@ async function main() {
         type: "tryout",
         startDate: tryoutData.startDate,
         endDate: tryoutData.endDate,
+        code: tryouts[0].code,
+        title: tryouts[0].title,
       };
 
       const data: any = { status };
