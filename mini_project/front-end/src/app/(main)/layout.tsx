@@ -24,14 +24,14 @@ export default function HomeLayout({
     getCookiesToken();
   }, []);
 
-  useEffect(() => {
-    if (!token) {
-      router.push("/");
-    }
-  }, [!token]);
+  // useEffect(() => {
+  //   if (!token) {
+  //     router.push("/");
+  //   }
+  // }, [!token]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-900 font-[family-name:var(--font-roboto-mono)]">
       <header className="fixed top-0 inset-x-0 flex items-center justify-between px-6 py-4 border-b border-gray-800 bg-gray-800 z-50">
         <div
           className="flex items-center space-x-2 cursor-pointer"
@@ -109,7 +109,10 @@ export default function HomeLayout({
             </div>
 
             {/* Completed Exams section */}
-            <div className="mb-1 border-b border-gray-700 relative select-none rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-gray-700 cursor-pointer flex items-center">
+            <div
+              className="mb-1 border-b border-gray-700 relative select-none rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-gray-700 cursor-pointer flex items-center"
+              onClick={() => router.push("/completed-exams")}
+            >
               <ClipboardList width={24} height={24} className="h-4 w-4 mr-2" />
               <span>Completed Exams</span>
             </div>

@@ -72,7 +72,9 @@ export const authTokenValidator = async (
   next: NextFunction
 ) => {
   try {
-    const authHeader = req.cookies.auth_token ?? req.headers["authorization"];
+    const authHeader = req.headers["authorization"] ?? req.cookies.auth_token;
+    console.log(authHeader);
+
     if (!authHeader) {
       res.status(401).json({
         status: "error",
@@ -81,16 +83,7 @@ export const authTokenValidator = async (
       return;
     }
 
-    const token = authHeader.split(" ")[1];
-    if (!token) {
-      res.status(401).json({
-        status: "error",
-        message: "Token missing",
-      });
-      return;
-    }
-
-    const decoded = Jwt.verify(token, env.JWT_SECRET);
+    const decoded = Jwt.verify(authHeader, env.JWT_SECRET);
     if (!decoded) {
       res.status(401).json({
         status: "error",

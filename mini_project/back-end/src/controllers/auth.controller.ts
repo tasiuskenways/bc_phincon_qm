@@ -44,6 +44,8 @@ class AuthController {
         maxAge: 1000 * 60 * 60 * 24,
       });
 
+      console.log(token);
+
       res.status(200).json({
         status: "success",
         message: "Login successful",
