@@ -15,10 +15,11 @@ export async function generatePdfBuffer(data: {
   title: string;
   code: string;
   type: string;
+  userId: string;
 }) {
   try {
     const qrBase64 = await QRCode.toDataURL(
-      `${env.CORS_ORIGIN}/certificate/${data.id}/${data.name}`
+      `${env.CORS_ORIGIN}/certificate/${data.id}/${data.userId}`
     );
     const html = generateCertificateHtml({ ...data, qrBase64 });
 
@@ -34,13 +35,13 @@ export async function generatePdfBuffer(data: {
     const outputPath = path.join(
       path.join(__dirname, ".."),
       "generated",
-      `certificate-${data.id}-${data.name}.pdf`
+      `certificate-${data.id}-${data.userId}.pdf`
     );
     fs.writeFileSync(outputPath, pdf);
     await browser.close();
     return {
       path: outputPath,
-      name: `certificate-${data.id}-${data.name}.pdf`,
+      name: `certificate-${data.id}-${data.userId}.pdf`,
     };
   } catch (error: any) {
     console.error(error);

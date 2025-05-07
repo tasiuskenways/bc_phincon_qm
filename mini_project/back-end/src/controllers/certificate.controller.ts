@@ -5,16 +5,17 @@ class CertificateControllers {
   async generateCertificate(req: Request, res: Response) {
     try {
       const { examId, userId } = req.body;
+
       const certificate = await certificateServices.generateCertificate(
         userId,
         examId
       );
-      //   res.status(200).json({
-      //     status: "success",
-      //     message: "Certificate generated successfully",
-      //     data: certificate,
-      //   });
 
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${certificate?.name}"`
+      );
       res.download(certificate?.path || "", certificate?.name || "", (err) => {
         if (err) {
           console.error("Download error:", err);
