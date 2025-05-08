@@ -16,6 +16,7 @@ const envSchema = z.object({
   CRYPTO_PASSWORD: z.string().min(1),
   CRYPTO_ALGORITHM: z.string().default("aes-256-cbc"),
   CRYPTO_BUFFER_IV: z.string().min(1),
+  URL_QR: z.string().min(1),
 });
 
 export const env = envSchema.parse(process.env);

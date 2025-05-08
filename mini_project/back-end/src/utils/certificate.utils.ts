@@ -17,27 +17,26 @@ export async function generatePdfBuffer(data: {
   type: string;
   userId: string;
 }) {
+  const outputPath = path.join(
+    __dirname,
+    "..",
+    "generated",
+    `certificate-${data.id}-${data.userId}.pdf`
+  );
   try {
-    const qrBase64 = await QRCode.toDataURL(
-      `${env.CORS_ORIGIN}/certificate/${data.id}/${data.userId}`
-    );
-    const html = generateCertificateHtml({ ...data, qrBase64 });
+    const [qrBase64, browser] = await Promise.all([
+      QRCode.toDataURL(`${env.URL_QR}/certificate/${data.id}/${data.userId}`),
+      puppeteer.launch({ headless: true }),
+    ]);
 
-    const browser = await puppeteer.launch({ headless: true });
+    const html = generateCertificateHtml({ ...data, qrBase64 });
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "domcontentloaded" });
 
     const pdf = await page.pdf({ format: "A4", landscape: true });
-    const dirPath = path.join(path.join(__dirname, ".."), "generated");
-    if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath, { recursive: true });
-    }
-    const outputPath = path.join(
-      path.join(__dirname, ".."),
-      "generated",
-      `certificate-${data.id}-${data.userId}.pdf`
-    );
+    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
     fs.writeFileSync(outputPath, pdf);
+
     await browser.close();
     return {
       path: outputPath,

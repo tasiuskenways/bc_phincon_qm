@@ -12,6 +12,14 @@ const robotoMono = Roboto_Mono({
   subsets: ["latin"],
 });
 
+export const metadata: Metadata = {
+  title: {
+    default: "Phindojo KW",
+    template: "%s | Phindojo KW",
+  },
+  description: "KW NYA PHINDOJO",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{

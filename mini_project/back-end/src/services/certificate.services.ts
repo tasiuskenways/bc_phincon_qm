@@ -6,59 +6,88 @@ import fs from "fs";
 const prisma = new PrismaClient();
 
 class CertificateServices {
+  filename = (examId: string, userId: string) => {
+    return `certificate-${examId}-${userId}.pdf`;
+  };
+
+  filePath = (examId: string, userId: string) => {
+    return path.join(
+      path.join(__dirname, ".."),
+      "generated",
+      this.filename(examId, userId)
+    );
+  };
+
+  /**
+   * Determines whether a certificate file exists for a specific user and exam.
+   *
+   * @param userId - The ID of the user.
+   * @param examId - The ID of the exam.
+   * @returns A promise that resolves to true if the certificate file exists, otherwise false.
+   */
+
+  async isCertificateExist(userId: string, examId: string): Promise<boolean> {
+    const filePath = this.filePath(examId, userId);
+    return fs.promises
+      .access(filePath, fs.constants.F_OK)
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  /**
+   * Generates a certificate PDF for a specific user and exam.
+   *
+   * If a certificate already exists, it returns the path and name of the existing certificate.
+   * Otherwise, it fetches exam details from the database, generates a PDF, and returns the PDF details.
+   *
+   * @param userId - The ID of the user for whom the certificate is being generated.
+   * @param examId - The ID of the exam for which the certificate is being generated.
+   * @returns A promise that resolves with the path and name of the generated certificate PDF.
+   * @throws An error if the certificate generation process fails.
+   */
+
   async generateCertificate(userId: string, examId: string) {
     try {
-      const filename = `certificate-${examId}-${userId}.pdf`;
-      const filePath = path.join(
-        path.join(__dirname, ".."),
-        "generated",
-        filename
-      );
-
-      if (!fs.existsSync(filePath)) {
-        const examDb = await prisma.exams.findUniqueOrThrow({
-          where: { id: examId, userId: userId },
-          select: {
-            id: true,
-            data: true,
-            userId: true,
-            tag: true,
-            user: {
-              select: {
-                id: true,
-                username: true,
-                fullname: true,
-                email: true,
-              },
-            },
-          },
-        });
-
-        const exam = {
-          ...examDb,
-          data: JSON.parse(examDb.data?.toString() || ""),
-        };
-
-        const pdf = generatePdfBuffer({
-          id: exam.id,
-          userId: exam.user.id,
-          name: exam.user.fullname,
-          score: exam.data.exam.score,
-          issuedDate: new Date().toDateString(),
-          startDate: new Date(exam.data.exam.startDate).toDateString(),
-          endDate: new Date(exam.data.exam.endDate).toDateString(),
-          title: exam.data.exam.title,
-          code: exam.data.exam.code,
-          type: exam.data.exam.type,
-        });
-
-        return pdf;
-      } else {
+      if (await this.isCertificateExist(userId, examId)) {
         return {
-          path: filePath,
-          name: filename,
+          path: this.filePath(examId, userId),
+          name: this.filename(examId, userId),
         };
       }
+
+      const examDb = await prisma.exams.findUniqueOrThrow({
+        where: { id: examId, userId: userId },
+        select: {
+          id: true,
+          data: true,
+          userId: true,
+          tag: true,
+          user: {
+            select: {
+              id: true,
+              username: true,
+              fullname: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      const examData = JSON.parse(examDb.data?.toString() || "");
+      const pdf = await generatePdfBuffer({
+        id: examDb.id,
+        userId: examDb.user.id,
+        name: examDb.user.fullname,
+        score: examData.exam.score,
+        issuedDate: new Date().toDateString(),
+        startDate: new Date(examData.exam.startDate).toDateString(),
+        endDate: new Date(examData.exam.endDate).toDateString(),
+        title: examData.exam.title,
+        code: examData.exam.code,
+        type: examData.exam.type,
+      });
+
+      return pdf;
     } catch (error: any) {
       throw new Error("Failed to generate certificate " + error.message);
     }

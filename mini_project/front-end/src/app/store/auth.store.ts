@@ -3,7 +3,7 @@ import { AuthStore } from "../types/auth.types";
 import { jwtDecode } from "jwt-decode";
 import { decrypt } from "../utils/encrypt.utils";
 import { login } from "../services/api/AuthApi";
-import { getCookie } from "../utils/cookies.utils";
+import { getCookie, getToken } from "../utils/cookies.utils";
 
 export const useAuthStore = create<AuthStore>((set) => ({
   token: "",
@@ -32,7 +32,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
   getCookiesToken: async () => {
     try {
-      const token = (await getCookie("auth_token"))?.value ?? "";
+      const token = await getToken();
       const decodedToken: any = jwtDecode(token);
 
       const decryptToken = await decrypt(decodedToken.___);

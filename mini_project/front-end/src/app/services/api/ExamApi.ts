@@ -15,12 +15,16 @@ export const getAllExams = async (): Promise<BaseResponse<ExamResponse[]>> => {
 
     const decryptToken = await decrypt(decodedToken.___);
     const decryptTokenData = JSON.parse(decryptToken);
+    ("use cache");
     const response = await fetch(
       `${env.API_URL}exams/completed/${decryptTokenData.id}`,
       {
         method: "GET",
       }
     );
+    if (!response.ok) {
+      throw new Error("Failed to fetch exams");
+    }
     const json = await response.json();
     return json;
   } catch (error: any) {
@@ -48,6 +52,23 @@ export const downloadCertificate = async (examId: string) => {
 
     const blob = await response.blob();
     return blob;
+  } catch (error: any) {
+    console.error(error);
+    throw new Error(error.message);
+  }
+};
+
+export const validateCertificate = async (examId: string, userId: string) => {
+  try {
+    const env = await getEnv();
+    const response = await fetch(
+      `${env.API_URL}certificate/validate/${examId}/${userId}`,
+      {
+        method: "GET",
+      }
+    );
+    const json = await response.json();
+    return json.data.isValid;
   } catch (error: any) {
     console.error(error);
     throw new Error(error.message);

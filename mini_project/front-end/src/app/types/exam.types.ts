@@ -5,9 +5,11 @@ export interface ExamStore {
   error: string | null;
   exams: ExamType[] | null;
   blob: Blob | null;
+  isValid: boolean | null;
   fetchExams: () => Promise<void>;
   resetError: () => void;
   downloadCertificate: (id: string) => Promise<void>;
+  validateCertificate: (examId: string, userId: string) => Promise<void>;
 }
 
 export interface ExamType {

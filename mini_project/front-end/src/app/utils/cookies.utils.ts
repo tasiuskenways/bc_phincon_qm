@@ -10,19 +10,15 @@ export const getCookie = async (name: string) => {
 };
 
 export const storeApiCookie = async (name: string, cookiesHeader: string[]) => {
-  try {
-    const cookieStore = await cookies();
-    const foundCookie = cookiesHeader
-      ?.find((cookie) => cookie.includes(name))
-      ?.split("=")[1];
-    if (!foundCookie) {
-      throw new Error("Cookie not found");
-    }
-    cookieStore.set(name, foundCookie, cookieOptions);
-    return foundCookie;
-  } catch (error) {
-    console.error(error);
+  const cookieStore = await cookies();
+  const foundCookie = cookiesHeader.find((cookie) =>
+    cookie.startsWith(`${name}=`)
+  );
+  if (!foundCookie) {
+    throw new Error("Cookie not found");
   }
+  cookieStore.set(name, foundCookie.split("=")[1], cookieOptions);
+  return foundCookie.split("=")[1];
 };
 
 export const storeCookie = async (name: string, value: string) => {
@@ -33,3 +29,8 @@ export const storeCookie = async (name: string, value: string) => {
     console.error(error);
   }
 };
+
+export async function getToken(): Promise<string> {
+  const cookieStore = await cookies();
+  return cookieStore.get("auth_token")?.value ?? "";
+}

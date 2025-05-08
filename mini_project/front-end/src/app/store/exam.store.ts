@@ -1,15 +1,21 @@
 import { create } from "zustand";
 import { ExamResponse, ExamStore, ExamType } from "../types/exam.types";
-import { downloadCertificate, getAllExams } from "../services/api/ExamApi";
+import {
+  downloadCertificate,
+  getAllExams,
+  validateCertificate,
+} from "../services/api/ExamApi";
 
 export const useExamStore = create<ExamStore>((set) => ({
   isLoading: false,
   error: null,
   exams: null,
   blob: null,
+  isValid: null,
   fetchExams: async () => {
     try {
       set({ isLoading: true });
+      ("use cache");
       const response = await getAllExams();
       const examsData: ExamType[] = response.data.map((item: ExamResponse) => {
         return {
@@ -39,6 +45,16 @@ export const useExamStore = create<ExamStore>((set) => ({
       const blob = await downloadCertificate(id);
 
       set({ isLoading: false, blob });
+    } catch (error: any) {
+      set({ isLoading: false, error: error.message });
+    }
+  },
+  validateCertificate: async (examId, userId) => {
+    try {
+      set({ isLoading: true });
+      const isValid = await validateCertificate(examId, userId);
+
+      set({ isLoading: false, isValid });
     } catch (error: any) {
       set({ isLoading: false, error: error.message });
     }
