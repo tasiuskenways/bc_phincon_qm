@@ -19,17 +19,11 @@ export default function HomeLayout({
   children: React.ReactNode;
 }>) {
   const router = useRouter();
-  const { user, token, getCookiesToken } = useAuthStore();
+  const { user, token, getCookiesToken, logout } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
   useEffect(() => {
     getCookiesToken();
   }, []);
-
-  // useEffect(() => {
-  //   if (!token) {
-  //     router.push("/");
-  //   }
-  // }, [token]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-900 font-[family-name:var(--font-roboto-mono)]">
@@ -136,7 +130,14 @@ export default function HomeLayout({
                 </div>
 
                 {/* Logout section */}
-                <div className="relative select-none rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-red-600 cursor-pointer flex items-center text-red-400 hover:text-white">
+                <div
+                  className="relative select-none rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-red-600 cursor-pointer flex items-center text-red-400 hover:text-white"
+                  onClick={() => {
+                    logout();
+                    setIsOpen(false);
+                    router.push("/");
+                  }}
+                >
                   <LogOut width={24} height={24} className="h-4 w-4 mr-2" />
                   <span>Logout</span>
                 </div>

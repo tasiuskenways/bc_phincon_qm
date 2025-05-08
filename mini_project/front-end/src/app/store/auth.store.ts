@@ -3,7 +3,7 @@ import { AuthStore } from "../types/auth.types";
 import { jwtDecode } from "jwt-decode";
 import { decrypt } from "../utils/encrypt.utils";
 import { login } from "../services/api/AuthApi";
-import { getCookie, getToken } from "../utils/cookies.utils";
+import { deleteCookie, getCookie, getToken } from "../utils/cookies.utils";
 
 export const useAuthStore = create<AuthStore>((set) => ({
   token: "",
@@ -49,5 +49,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
   resetError: () => {
     set({ error: null });
+  },
+
+  logout: async () => {
+    try {
+      await deleteCookie("auth_token");
+      set({ token: undefined, user: null });
+    } catch (error) {
+      console.error(error);
+    }
   },
 }));

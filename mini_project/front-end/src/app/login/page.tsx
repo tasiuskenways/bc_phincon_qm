@@ -15,6 +15,10 @@ export default function Login() {
   const router = useRouter();
 
   useEffect(() => {
+    getCookiesToken();
+  }, []);
+
+  useEffect(() => {
     if (token) {
       router.push("/");
     }

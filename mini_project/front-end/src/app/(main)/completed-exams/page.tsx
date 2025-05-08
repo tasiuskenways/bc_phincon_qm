@@ -1,11 +1,16 @@
 "use client";
+import { useAuthStore } from "@/app/store/auth.store";
 import { useExamStore } from "@/app/store/exam.store";
-import { FileText, SearchIcon, Download, LoaderCircle } from "lucide-react";
+import { FileText, SearchIcon, Download, MoreHorizontal } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect } from "react";
 
 export default function CompletedExams() {
   const { exams, fetchExams, isLoading, downloadCertificate, blob } =
     useExamStore();
+
+  const { token } = useAuthStore();
+  const router = useRouter();
 
   useEffect(() => {
     fetchExams();
@@ -23,6 +28,12 @@ export default function CompletedExams() {
       window.URL.revokeObjectURL(url);
     }
   }, [blob]);
+
+  useEffect(() => {
+    if (!token) {
+      router.push("/");
+    }
+  }, [token]);
 
   const onSearch = (e: ChangeEvent<HTMLInputElement>) => {
     //TODO: Hit API with search term
@@ -77,20 +88,12 @@ export default function CompletedExams() {
           </>
         ) : (
           <table className="w-full text-white">
-            {/* <thead>
-              <tr>
-                <th className="px-4 py-2">Exam</th>
-                <th className="px-4 py-2">Score</th>
-                <th className="px-4 py-2">Actions</th>
-              </tr>
-            </thead> */}
             <tbody>
               {exams?.map((exam) => (
                 <tr key={exam.id}>
                   <td className="px-4 py-2">{exam.title}</td>
-                  <td className="px-4 py-2">{exam.score}</td>
                   <td className="px-4 py-2">
-                    <div className="flex justify-end space-x-4">
+                    <div className="hidden md:flex justify-end space-x-4">
                       <button
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                         type="button"
@@ -106,31 +109,24 @@ export default function CompletedExams() {
                           }
                         }}
                       >
-                        {/* {isLoading ? (
-                          <>
-                            <LoaderCircle
-                              width={24}
-                              height={24}
-                              className="w-5 h-5 mr-2 animate-spin"
-                            />
-                            Downloading
-                          </>
-                        ) : (
-                          <>
-                            <Download
-                              width={24}
-                              height={24}
-                              className="w-5 h-5 mr-2"
-                            />
-                            Certificates
-                          </>
-                        )} */}
                         <Download
                           width={24}
                           height={24}
                           className="w-5 h-5 mr-2"
                         />
                         Certificates
+                      </button>
+                    </div>
+                    <div className="md:hidden flex justify-end">
+                      <button
+                        type="button"
+                        className="items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <MoreHorizontal
+                          width={24}
+                          height={24}
+                          className="w-5 h-5"
+                        />
                       </button>
                     </div>
                   </td>

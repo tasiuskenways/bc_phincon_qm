@@ -34,3 +34,8 @@ export async function getToken(): Promise<string> {
   const cookieStore = await cookies();
   return cookieStore.get("auth_token")?.value ?? "";
 }
+
+export const deleteCookie = async (key: string) => {
+  const cookieStore = await cookies();
+  cookieStore.delete(key);
+};

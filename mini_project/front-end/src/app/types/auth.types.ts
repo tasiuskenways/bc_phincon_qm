@@ -9,6 +9,7 @@ export interface AuthStore {
   fetchLogin: (email: string, password: string) => Promise<void>;
   getCookiesToken: () => Promise<void>;
   resetError: () => void;
+  logout: () => void;
 }
 
 export interface LoginResponse {
