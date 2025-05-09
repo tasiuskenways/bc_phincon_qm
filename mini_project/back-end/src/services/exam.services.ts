@@ -27,6 +27,10 @@ class ExamServices {
       .filter((exam) => exam.data.status === "completed");
     return completed;
   }
+
+  async getExamById(id: string) {
+    return await primsa.exams.findUnique({ where: { id } });
+  }
 }
 
 export default new ExamServices();

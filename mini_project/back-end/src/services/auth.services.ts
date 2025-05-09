@@ -8,13 +8,18 @@ const prisma = new PrismaClient();
 class AuthServices {
   async login(email: string): Promise<Users> {
     try {
-      const user = await prisma.users.findUniqueOrThrow({
+      const user = await prisma.users.findUnique({
         where: { email },
       });
 
+      if (!user) {
+        throw new Error("Invalid username or password");
+      }
+
       return user;
-    } catch (error: any) {
-      throw new Error("Failed to login user " + error.message);
+    } catch (error: unknown) {
+      console.error(error);
+      throw new Error("Failed to login");
     }
   }
   async register(
@@ -26,24 +31,27 @@ class AuthServices {
   ): Promise<Users> {
     try {
       const id = uuidv7();
-      const saltRounds = bcryptjs.genSaltSync(10);
-      const hashedPassowrd = await bcryptjs.hash(
-        id + env.SECRET_KEY + password,
-        saltRounds
-      );
-      const user = await prisma.users.create({
-        data: {
-          id: id,
-          username: username,
-          password: hashedPassowrd,
-          email: email,
-          fullname: fullname,
-          phoneNumber: phoneNumber,
-        },
+      return await prisma.$transaction(async (prisma) => {
+        const saltRounds = bcryptjs.genSaltSync(10);
+        const hashedPassowrd = await bcryptjs.hash(
+          id + env.SECRET_KEY + password,
+          saltRounds
+        );
+        const user = await prisma.users.create({
+          data: {
+            id: id,
+            username: username,
+            password: hashedPassowrd,
+            email: email,
+            fullname: fullname,
+            phoneNumber: phoneNumber,
+          },
+        });
+        return user;
       });
-      return user;
-    } catch (error: any) {
-      throw new Error("Failed to register user " + error.message);
+    } catch (error: unknown) {
+      console.error(error);
+      throw new Error("Failed to register");
     }
   }
 }

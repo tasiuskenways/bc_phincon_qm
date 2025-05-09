@@ -17,6 +17,8 @@ const envSchema = z.object({
   CRYPTO_ALGORITHM: z.string().default("aes-256-cbc"),
   CRYPTO_BUFFER_IV: z.string().min(1),
   URL_QR: z.string().min(1),
+  REDIS_HOST: z.string().min(1),
+  REDIS_PORT: z.coerce.number().default(6379),
 });
 
 export const env = envSchema.parse(process.env);

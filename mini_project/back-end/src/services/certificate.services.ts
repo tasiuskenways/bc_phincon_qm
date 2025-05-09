@@ -55,7 +55,7 @@ class CertificateServices {
         };
       }
 
-      const examDb = await prisma.exams.findUniqueOrThrow({
+      const examDb = await prisma.exams.findUnique({
         where: { id: examId, userId: userId },
         select: {
           id: true,
@@ -73,6 +73,10 @@ class CertificateServices {
         },
       });
 
+      if (!examDb) {
+        throw new Error("Exam or user not found");
+      }
+
       const examData = JSON.parse(examDb.data?.toString() || "");
       const pdf = await generatePdfBuffer({
         id: examDb.id,
@@ -88,8 +92,10 @@ class CertificateServices {
       });
 
       return pdf;
-    } catch (error: any) {
-      throw new Error("Failed to generate certificate " + error.message);
+    } catch (error: unknown) {
+      console.error(error);
+
+      throw new Error("Failed to generate certificate");
     }
   }
 }
